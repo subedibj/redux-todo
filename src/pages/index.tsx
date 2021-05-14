@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addTodo,
@@ -11,11 +11,12 @@ import { MdBorderColor, MdDeleteForever } from "react-icons/md";
 const Home = () => {
   const [inputData, setInputData] = useState("");
   const [toggleButton, setToggleButton] = useState(false);
+  const [selectedData, setSelectedData] = useState(null);
 
   // @ts-ignore
   const itemsData = useSelector((state) => state.todo.list);
+
   const dispatch = useDispatch();
-  console.log(itemsData.length, "length");
 
   return (
     <>
@@ -34,30 +35,39 @@ const Home = () => {
           <button
             className="rounded-md text-white px-4 py-1 bg-green-400"
             // @ts-ignore
-            onClick={() => dispatch(addTodo(inputData), setInputData(" "))}
+            onClick={() => {
+              toggleButton
+                ? dispatch(editTodo({ id: selectedData.id, data: inputData }))
+                : dispatch(addTodo(inputData));
+              setInputData("");
+              setSelectedData(null);
+              setToggleButton(false);
+            }}
           >
             {toggleButton ? "UPDATE" : "ADD"}
           </button>
         </div>
 
-        {itemsData.map((item, index) => {
+        {itemsData.map((item) => {
           return (
             <div className="text-center flex flex-row space-x-4 justify-center">
               <div
                 key={item.id}
                 className="text-white flex flex-row space-x-4 items-center"
               >
-                <span>{index + 1}.</span>
+                <span>{item.data}</span>
                 <MdDeleteForever
                   className="text-red-200 h-6 w-6 cursor-pointer hover:text-red-400"
                   onClick={() => dispatch(deleteTodo(item.id))}
                 />
+
                 <MdBorderColor
                   className="text-green-500 hover:text-green-300 cursor-pointer w-6 h-5"
-                  onClick={() =>
-                    // @ts-ignore
-                    dispatch(editTodo(item.id), setToggleButton(true))
-                  }
+                  onClick={() => {
+                    setInputData(item.data);
+                    setToggleButton(true);
+                    setSelectedData({ id: item.id, data: item.data });
+                  }}
                 />
               </div>
             </div>
